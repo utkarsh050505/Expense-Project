@@ -1,11 +1,39 @@
 const usernameField = document.querySelector('#usernameField');
-const feedbackField = document.querySelector(".invalid-feedback")
+const usernameFeedbackField = document.querySelector(".invalid-feedback-username");
+const emailField = document.querySelector("#emailField");
+const emailFeedbackField = document.querySelector(".invalid-feedback-email");
+
+emailField.addEventListener('keyup', (event) => {
+    emailVal = event.target.value;
+    emailField.classList.remove("is-invalid");
+    emailFeedbackField.style.display = "none";
+    emailFeedbackField.innerHTML = ``;
+
+    if (emailVal.length > 0) {
+        fetch('/authentication/validate-email', {
+            body: JSON.stringify({email: emailVal}),
+            method: 'POST',
+        })
+        .then(
+            response => response.json()
+        )
+        .then(
+            data => {
+                if (data.email_error) {
+                    emailField.classList.add("is-invalid");
+                    emailFeedbackField.style.display = "block";
+                    emailFeedbackField.innerHTML = `<p>${data.email_error}</p>`;
+                }
+            }
+        )
+    }
+})
 
 usernameField.addEventListener('keyup', (event) => {
     usernameVal = event.target.value;
     usernameField.classList.remove('is-invalid');
-    feedbackField.style.display = 'none';
-    feedbackField.innerHTML = ``;
+    usernameFeedbackField.style.display = 'none';
+    usernameFeedbackField.innerHTML = ``;
     
     if (usernameVal.length > 0) {
         fetch('/authentication/validate-username', {
@@ -17,11 +45,10 @@ usernameField.addEventListener('keyup', (event) => {
         )
         .then(
             data => {
-                console.log("data", data);
                 if (data.username_error) {
                     usernameField.classList.add('is-invalid');
-                    feedbackField.style.display = 'block';
-                    feedbackField.innerHTML = `<p>${data.username_error}</p>`;
+                    usernameFeedbackField.style.display = 'block';
+                    usernameFeedbackField.innerHTML = `<p>${data.username_error}</p>`;
                 }
             }
         );
