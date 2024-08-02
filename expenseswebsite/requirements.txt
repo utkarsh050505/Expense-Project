@@ -1,0 +1,6 @@
+django-heroku==0.3.1
+gunicorn==20.1.0
+Django==4.2.4
+waitress==2.1.2
+psycopg2==2.9.7
+validate-email==1.3
