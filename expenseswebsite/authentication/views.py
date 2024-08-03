@@ -38,8 +38,6 @@ class UsernameValidationView(View):
 
 class RegistrationView(View):
     def get(self, request):
-        user = User.objects.get(email="utkarshmandal420@gmail.com")
-        user.delete()
         return render(request, 'authentication/register.html')
     
     def post(self, request):
