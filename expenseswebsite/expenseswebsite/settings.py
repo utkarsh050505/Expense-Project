@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-wgf^=(t!qmv3wxwr973489p79e^8tu_wz$c90vt9)#9ibl*pg#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['.vercel.app']
+ALLOWED_HOSTS = ['127.0.0.1','.vercel.app', '.now.sh', 'localhost']
 
 
 # Application definition
@@ -82,7 +82,11 @@ WSGI_APPLICATION = 'expenseswebsite.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': 'railway',
+        'USER': 'postgres',
+        'PASSWORD': 'yjDoaxMKgvcsYcuiqHoEtrVsqPiAcQas',
+        'HOST': 'postgres.railway.internal',
+        'PORT': '5432'
     }
 }
 
@@ -123,7 +127,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'expenseswebsite/static')]
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
