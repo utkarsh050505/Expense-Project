@@ -5,6 +5,12 @@ from django.contrib.auth.models import User # type: ignore
 from validate_email import validate_email # type: ignore
 from django.contrib import messages # type: ignore
 from django.core.mail import send_mail # type: ignore
+from django.shortcuts import redirect # type: ignore
+from django.utils.encoding import force_bytes, force_str, DjangoUnicodeDecodeError # type: ignore
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode # type: ignore
+from django.contrib.sites.shortcuts import get_current_site # type: ignore
+from django.urls import reverse # type: ignore
+from .utils import token_generator
 import json
 
 # Create your views here.
@@ -58,12 +64,33 @@ class RegistrationView(View):
                         'username': username,
                         'email': email
                     })
+                
 
                 user = User.objects.create_user(username=username, email=email)
                 user.set_password(password)
                 user.is_active = False
+                user.save()
+
+                # path-to-view
+                    # - getting domain we are on
+                    # - relative url to verification
+                    # - encode uid
+                    # - token
+
+                uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+                domain = get_current_site(request).domain
+                link = reverse(
+                    'activate',
+                    kwargs={
+                        'uidb64': uidb64,
+                        'token': token_generator.make_token(user)
+                    }
+                )
+
+                activate_url = 'http://' + domain + link
+
                 email_subject = 'Activate your account'
-                email_body = 'Test'
+                email_body = 'Hi ' + user.username + '\n' + 'Please use this link to verify your email - ' + activate_url
 
                 send_mail(
                     email_subject,
@@ -73,8 +100,10 @@ class RegistrationView(View):
                     fail_silently=False
                 )
 
-                user.save()
-
                 messages.success(request, "Account created successfully :)")
 
         return render(request, 'authentication/register.html')
+
+class VerificationView(View):
+    def get(self, request, uidb64, token):
+        return redirect('login')

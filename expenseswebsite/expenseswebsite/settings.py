@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
+import django_heroku
 from django.contrib import messages
 
 
@@ -28,7 +29,7 @@ SECRET_KEY = 'django-insecure-wgf^=(t!qmv3wxwr973489p79e^8tu_wz$c90vt9)#9ibl*pg#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1','.vercel.app', '.now.sh', 'localhost']
+ALLOWED_HOSTS = ['.vercel.app']
 
 
 # Application definition
@@ -46,7 +47,6 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -81,12 +81,12 @@ WSGI_APPLICATION = 'expenseswebsite.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'railway',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'incomeexpensesdb',
         'USER': 'postgres',
-        'PASSWORD': 'yjDoaxMKgvcsYcuiqHoEtrVsqPiAcQas',
-        'HOST': 'postgres.railway.internal',
-        'PORT': '5432'
+        'PASSWORD': 'tringtrong123',
+        'HOST': 'localhost',
+        'PORT': 5432
     }
 }
 
@@ -126,15 +126,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'expenseswebsite/static')]
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
-MEDIA_URL = "img/"
-MEDIA_ROOT = BASE_DIR/'media'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+django_heroku.settings(locals())
 
 MESSAGE_TAGS = {
     messages.ERROR: "danger"
