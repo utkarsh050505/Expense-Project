@@ -1,10 +1,11 @@
 from django.urls import path # type: ignore
 from django.views.decorators.csrf import csrf_exempt # type: ignore
-from .views import RegistrationView, UsernameValidationView, VerificationView, EmailValidationView
+from .views import RegistrationView, UsernameValidationView, VerificationView, EmailValidationView, LoginView
 
 urlpatterns = [
     path("register", RegistrationView.as_view(), name="register"),
     path("validate-username", csrf_exempt(UsernameValidationView.as_view()), name="validate-username"),
     path("validate-email", csrf_exempt(EmailValidationView.as_view()), name="validate-email"),
     path("activate/<uidb64>/<token>", VerificationView.as_view(), name="activate"),
+    path("login", LoginView.as_view(), name="login")
 ]
