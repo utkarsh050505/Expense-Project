@@ -8,16 +8,13 @@
     <form action="{% url 'preferences' %}" method="post">
         {% csrf_token %}
         <div class="input-group">
-            <!-- Apply name attribute to the select element -->
             <select class="custom-select" id="inputGroupSelect04" name="currency">
                 {% if user_preferences %}
-                    <!-- Ensure the value is correctly populated -->
                     <option selected value="{{ user_preferences.currency }}">{{ user_preferences.currency }}</option>
                 {% else %}
                     <option selected value="">Choose...</option>
                 {% endif %}
                 {% for currency in currencies %}
-                    <!-- Populate options dynamically -->
                     <option value="{{ currency.name }} - {{ currency.value }}">{{ currency.name }} - {{ currency.value }}</option>
                 {% endfor %}
             </select>
