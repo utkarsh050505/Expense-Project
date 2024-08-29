@@ -5,11 +5,18 @@ from django.contrib.auth.models import User # type: ignore
 from userpreferences.models import UserPreference
 from django.shortcuts import redirect # type: ignore
 from django.contrib import messages # type: ignore
+from django.core.paginator import Paginator # type: ignore
+from django.db.models import Q # type: ignore
+from django.http import JsonResponse
+import json
 
 @login_required(login_url="/authentication/login")
 def index(request):
     categories = Category.objects.all()
     expenses = Expense.objects.filter(owner=request.user)
+    paginator = Paginator(expenses, 5)
+    page_number = request.GET.get('page')
+    page_obj = Paginator.get_page(paginator, page_number)
 
     user_preference = None
     if UserPreference.objects.filter(user=request.user).exists():
@@ -18,9 +25,25 @@ def index(request):
     return render(request, 'expenses/index.html', {
         'categories': categories,
         'user_preference': user_preference,
-        'expenses': expenses
+        'expenses': expenses,
+        'page_obj': page_obj
     })
 
+def search_expense(request):
+    if request.method == 'POST':
+        search_str = json.loads(request.body).get('searchText')
+
+        expenses = Expense.objects.filter(
+        Q(amount__startswith=search_str, owner=request.user) |
+        Q(date__startswith=search_str, owner=request.user) |
+        Q(description__icontains=search_str, owner=request.user) |
+        Q(category__icontains=search_str)
+    )
+
+        data = expenses.values() 
+        return JsonResponse(list(data), safe=False)
+
+@login_required(login_url="/authentication/login")
 def add_expense(request):
     categories = Category.objects.all()
     values = request.POST
@@ -67,7 +90,8 @@ def add_expense(request):
             Expense.objects.create(amount=amount, description=description, owner=request.user, category=category)
             messages.success(request, 'Expense saved successfully.')
             return redirect('expenses')
-    
+
+@login_required(login_url="/authentication/login")
 def edit_expense(request, id):
     expense = Expense.objects.get(pk=id)
     categories = Category.objects.all()
@@ -124,6 +148,7 @@ def edit_expense(request, id):
             messages.success(request, 'Expense edited successfully.')
             return redirect('expenses')
 
+@login_required(login_url="/authentication/login")
 def delete_expense(request, id):
     expense = Expense.objects.get(pk=id)
     expense.delete()
