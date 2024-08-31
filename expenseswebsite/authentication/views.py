@@ -14,6 +14,8 @@ from django.contrib import auth # type: ignore
 from .utils import token_generator
 import json
 
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+
 # Create your views here.
 class EmailValidationView(View):
     def post(self, request):
@@ -60,7 +62,7 @@ class RegistrationView(View):
                     return render(request, 'authentication/register.html')
                 
                 if len(password) < 6:
-                    messages.error(request, 'Password should be greater than or equal to 6')
+                    messages.error(request, 'Password should be greater than 6 characters')
                     return render(request, 'authentication/register.html', {
                         'username': username,
                         'email': email
@@ -157,3 +159,96 @@ class LogoutView(View):
 
         auth.logout(request)
         return redirect('login')
+    
+class ResetPassword(View):
+    def get(self, request):
+        return render(request, 'authentication/reset-password.html')
+    
+    def post(self, request):
+        email = request.POST['email']
+
+        if not validate_email(email):
+            messages.error(request, "Please enter a valid email.")
+            return render(request, "authentication/reset-password.html")
+        
+        user = User.objects.filter(email=email)
+
+        if user.exists():
+
+            uidb64 = urlsafe_base64_encode(force_bytes(user[0].pk))
+            domain = get_current_site(request).domain
+            link = reverse(
+                    'set-new-password',
+                    kwargs={
+                        'uidb64': uidb64,
+                        'token': PasswordResetTokenGenerator().make_token(user[0])
+                        }
+                    )
+
+            reset_url = 'http://' + domain + link
+
+            email_subject = 'Reset your account password'
+            email_body = 'Hi there,' + '\n' + 'Please use this link to reset your account password - ' + reset_url
+
+            send_mail(
+                email_subject,
+                email_body,
+                "noreply@semicolon.com",
+                [email],
+                fail_silently=False
+                    )
+
+            messages.success(request, "Please check your email to reset your password")
+            return render(request, "authentication/reset-password.html")
+
+class CompletePasswordReset(View):
+    def get(self, request, uidb64, token):
+
+        try:
+            id = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=id)
+
+            if not PasswordResetTokenGenerator().check_token(user, token):
+                messages.info(request, "Password link invalid, please try again.")
+                return render(request, 'authentication/reset-password.html')
+        except Exception as e:
+            pass
+
+        return render(request, 'authentication/set-new-password.html', {
+            'uidb64': uidb64,
+            'token': token
+        })
+    
+    def post(self, request, uidb64, token):
+
+        password = request.POST["password"]
+        confirmPassword = request.POST["confirm-password"]
+
+        if password != confirmPassword:
+            messages.error(request, "Password does not match.")
+            return render(request, 'authentication/set-new-password.html', {
+                'uidb64': uidb64,
+                'token': token
+            })
+        
+        if len(password) < 6:
+            messages.error(request, 'Password should be greater than 6 characters')
+            return render(request, 'authentication/set-new-password.html', {
+                'uidb64': uidb64,
+                'token': token
+            })
+
+        try:
+            id = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=id)
+            user.set_password(password)
+            user.save()
+
+            messages.success(request, "Password reset successfully")
+            return redirect('login')
+        except Exception as e:
+            messages.error(request, "An unexpected error occurred, Please try again.")
+            return render(request, "authentication/set-new-password.html", {
+                'uidb64': uidb64,
+                'token': token
+            })

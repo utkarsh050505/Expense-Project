@@ -7,7 +7,7 @@ from django.shortcuts import redirect # type: ignore
 from django.contrib import messages # type: ignore
 from django.core.paginator import Paginator # type: ignore
 from django.db.models import Q # type: ignore
-from django.http import JsonResponse
+from django.http import JsonResponse # type: ignore
 import json
 
 @login_required(login_url="/authentication/login")
@@ -95,11 +95,15 @@ def add_expense(request):
 def edit_expense(request, id):
     expense = Expense.objects.get(pk=id)
     categories = Category.objects.all()
+    user_preference = None
+    if UserPreference.objects.filter(user=request.user).exists():
+        user_preference = UserPreference.objects.get(user=request.user)
 
     if request.method == 'GET':
         return render(request, 'expenses/edit-expense.html', {
             'categories': categories,
-            'values': expense
+            'values': expense,
+            'user_preference': user_preference
         })
     
     else:
@@ -112,19 +116,22 @@ def edit_expense(request, id):
             messages.error(request, 'Amount is required!')
             return render(request, 'expenses/edit-expense.html', {
                 'categories': categories,
-                'values': expense
+                'values': expense,
+                'user_preference': user_preference
             })
         if not description:
             messages.error(request, 'Description is required!')
             return render(request, 'expenses/edit-expense.html', {
                 'categories': categories,
-                'values': expense
+                'values': expense,
+                'user_preference': user_preference
             })
         if not category:
             messages.error(request, 'Please select a category.')
             return render(request, 'expenses/edit-expense.html', {
                 'categories': categories,
-                'values': expense
+                'values': expense,
+                'user_preference': user_preference
             })
         
         if date:

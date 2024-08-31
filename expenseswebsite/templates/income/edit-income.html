@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1>Edit Income</h1>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-10">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item"><a href="{% url 'income' %}">Income</a></li>
+              <li class="breadcrumb-item active" aria-current="page">Edit Income</li>
+            </ol>
+    </div>
+
+    <div class="col-md-2">
+        <a href="{% url 'delete-income' values.id %}" class="btn btn-danger btn-sm">Delete</a>
+    </div>
+  </div>
+</nav>
+
+  <div class="card">
+    <div class="card-body">
+
+      <form action="{% url 'edit-income' values.id %}" method="post">
+        {% csrf_token %}
+        {% include 'partials/messages.html' %}
+      <div class="form-group">
+        <label for="">Amount ({{ user_preference.currency }})</label>
+        <input class="form-control form-control-sm" type="number" name="amount" value="{{ values.amount }}"/>
+      </div>
+      <div class="form-group">
+        <label for="">Description</label>
+        <input class="form-control form-control-sm" type="text" name="description" value="{{ values.description }}"/>
+      </div>
+      <div class="form-group">
+        <label for="categorySelect">Source</label>
+        <select name="source" class="form-control" id="categorySelect">
+          <option selected value="{{ values.source }}">{{ values.source }}</option>
+          {% for source in sources %}
+          <option value="{{ source.name }}">{{ source.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="">Date</label>
+        <input class="form-control form-control-sm" type="date" value="{{ values.date|date:'Y-m-d' }}" name="income_date"/>
+      </div>
+      <input type="submit" value="Save" class="btn btn-primary" />
+    </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
