@@ -12,11 +12,30 @@ from django.contrib.sites.shortcuts import get_current_site # type: ignore
 from django.urls import reverse # type: ignore
 from django.contrib import auth # type: ignore
 from .utils import token_generator
+from django.contrib.auth.tokens import PasswordResetTokenGenerator # type: ignore
 import json
-
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
+import threading
 
 # Create your views here.
+class EmailThread(threading.Thread):
+    def __init__(self, email_subject, email_body, to_email):
+        self.email_subject = email_subject
+        self.email_body = email_body
+        self.to_email = to_email
+        threading.Thread.__init__(self)
+    
+    def run(self):
+        send_mail(
+            self.email_subject,
+            self.email_body,
+            "noreply@semicolon.com",
+            [self.to_email],
+            fail_silently=False
+        )
+
+
+
+
 class EmailValidationView(View):
     def post(self, request):
         data = json.loads(request.body)
@@ -95,13 +114,7 @@ class RegistrationView(View):
                 email_subject = 'Activate your account'
                 email_body = 'Hi ' + user.username + '\n' + 'Please use this link to verify your email - ' + activate_url
 
-                send_mail(
-                    email_subject,
-                    email_body,
-                    "noreply@semicolon.com",
-                    [email],
-                    fail_silently=False
-                )
+                EmailThread(email_subject, email_body, email).start()
 
                 messages.success(request, "Account created successfully, Please verify your email")
 
@@ -190,13 +203,7 @@ class ResetPassword(View):
             email_subject = 'Reset your account password'
             email_body = 'Hi there,' + '\n' + 'Please use this link to reset your account password - ' + reset_url
 
-            send_mail(
-                email_subject,
-                email_body,
-                "noreply@semicolon.com",
-                [email],
-                fail_silently=False
-                    )
+            EmailThread(email_subject, email_body, email).start()
 
             messages.success(request, "Please check your email to reset your password")
             return render(request, "authentication/reset-password.html")

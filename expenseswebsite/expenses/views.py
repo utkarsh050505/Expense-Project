@@ -8,6 +8,7 @@ from django.contrib import messages # type: ignore
 from django.core.paginator import Paginator # type: ignore
 from django.db.models import Q # type: ignore
 from django.http import JsonResponse # type: ignore
+import datetime
 import json
 
 @login_required(login_url="/authentication/login")
@@ -161,3 +162,32 @@ def delete_expense(request, id):
     expense.delete()
     messages.warning(request, 'Expense removed successfully')
     return redirect('expenses')
+
+@login_required(login_url="/authentication/login")
+def expense_summary(request):
+    todayDate = datetime.date.today()
+    sixMonthAgo = todayDate - datetime.timedelta(days=180)
+    expenses = Expense.objects.filter(date__gte=sixMonthAgo, date__lte=todayDate, owner=request.user)
+
+    representation = {}
+
+    getCategory = lambda expense: expense.category
+    
+    def getCategoryAmount(category):
+        amount = 0 
+        filterCategory = expenses.filter(category=category) 
+        for item in filterCategory: 
+            amount += item.amount 
+        return amount
+    
+    category_list = list(set(map(getCategory, expenses)))
+
+    for i in expenses:
+        for j in category_list:
+            representation[j] = getCategoryAmount(j)
+    
+    return JsonResponse({'expense_category_data': representation}, safe=False)
+
+@login_required(login_url="/authentication/login")
+def expense_stats(request):
+    return render(request, "expenses/expense_stats.html")
