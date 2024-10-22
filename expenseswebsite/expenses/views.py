@@ -7,7 +7,7 @@ from django.shortcuts import redirect # type: ignore
 from django.contrib import messages # type: ignore
 from django.core.paginator import Paginator # type: ignore
 from django.db.models import Q # type: ignore
-from django.http import JsonResponse # type: ignore
+from django.http import JsonResponse, HttpResponse # type: ignore
 import datetime
 import json
 

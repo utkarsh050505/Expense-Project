@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required # type: ignore
 from django.contrib import messages # type: ignore
 from django.http import JsonResponse # type: ignore
 from django.db.models import Q # type: ignore
+import datetime
 import json
 
 # Create your views here.
@@ -147,7 +148,7 @@ def delete_income(request, id):
     messages.warning(request, 'Income removed successfully')
     return redirect('income')
 
-
+@login_required(login_url="/authentication/login")
 def search_income(request):
     if request.method == 'POST':
         search_str = json.loads(request.body).get('searchText')
@@ -161,3 +162,32 @@ def search_income(request):
 
         data = income.values() 
         return JsonResponse(list(data), safe=False)
+
+@login_required(login_url="/authentication/login")
+def income_summary(request):
+    todayDate = datetime.date.today()
+    sixMonthAgo = todayDate - datetime.timedelta(days=180)
+    income = Income.objects.filter(date__gte=sixMonthAgo, date__lte=todayDate, owner=request.user)
+
+    representation = {}
+
+    getCategory = lambda income: income.source
+    
+    def getCategoryAmount(category):
+        amount = 0 
+        filterCategory = income.filter(source=category) 
+        for item in filterCategory: 
+            amount += item.amount 
+        return amount
+    
+    category_list = list(set(map(getCategory, income)))
+
+    for i in income:
+        for j in category_list:
+            representation[j] = getCategoryAmount(j)
+    
+    return JsonResponse({'income_category_data': representation}, safe=False)
+
+@login_required(login_url="/authentication/login")
+def income_stats(request):
+    return render(request, "income/income_stats.html")

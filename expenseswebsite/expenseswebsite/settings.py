@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
-import django_heroku # type: ignore
 from django.contrib import messages # type: ignore
 
 
@@ -29,7 +28,7 @@ SECRET_KEY = 'django-insecure-wgf^=(t!qmv3wxwr973489p79e^8tu_wz$c90vt9)#9ibl*pg#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['.vercel.app']
+ALLOWED_HOSTS = ['127.0.0.1', '127.0.0.1:8000']
 
 
 # Application definition
@@ -136,15 +135,14 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-django_heroku.settings(locals())
-
 MESSAGE_TAGS = {
     messages.ERROR: "danger"
 }
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'heyexpenses@gmail.com'
-EMAIL_HOST_PASSWORD = 'tflrxunhaczugldz'
+# In order to send email for verification etc. You need to uncomment the below and add Email ID and Password
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = Enter Email
+# EMAIL_HOST_PASSWORD = Enter Password

@@ -3,6 +3,7 @@ import os
 import json
 from django.conf import settings # type: ignore
 from .models import UserPreference
+from django.contrib.auth.models import User # type: ignore
 
 # Create your views here.
 def index(request):
@@ -47,3 +48,18 @@ def index(request):
             'currencies': currency_data,
             'user_preferences': user_preferences
         })
+
+def account_settings(request):
+
+    user = request.user
+    user_preference = None
+    if UserPreference.objects.filter(user=request.user).exists():
+        user_preference = UserPreference.objects.get(user=request.user)
+
+    return render(request, "preferences/account.html", {
+
+        'username': user.username,
+        'email': user.email,
+        'user_preference': user_preference
+
+    })
