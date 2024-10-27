@@ -38,7 +38,7 @@ Expense-Project is a full-stack application designed to help users keep track of
 
 1. **Clone the Repository**:
     ```bash
-    git clone https://github.com/your-username/Expense-Project.git
+    git clone [https://github.com/your-username/Expense-Project.git](https://github.com/utkarsh050505/Expense-Project.git)
     cd Expense-Project
     ```
 
